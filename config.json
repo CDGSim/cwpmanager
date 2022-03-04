@@ -1,0 +1,13 @@
+{
+    "gatewayIP":"xxx.xxx.xxx.xxx",
+    "gatewayLogin":"login",
+    "gatewayPassword":"password",
+    "positions":
+    [
+        {
+            "name":"Position 1",
+            "associatedODSHost":"xxx.xxx.xxx.xxx",
+            "associatedAMANHost":"txhostname"
+        }
+    ]
+}

@@ -9,7 +9,7 @@
 # Learn more: https://docs.docker.com/compose/reference/
 #
 #   Build images: docker-compose build
-#      Start app: docker-compose up app
+#      Start app: CONFIG=$(cat config.json) docker-compose up app
 #       Stop all: docker-compose down
 #
 version: '3.7'
@@ -19,12 +19,13 @@ x-shared_environment: &shared_environment
   
 services:
   app:
-    image: :latest
+    image: cwpmanager:latest
     build:
       context: .
     environment:
       <<: *shared_environment
+      CONFIG: ${CONFIG}
     ports:
-      - '8080:8080'
+      - '81:8080'
     # user: '0' # uncomment to run as root for testing purposes even though Dockerfile defines 'vapor' user.
     command: ["serve", "--env", "production", "--hostname", "0.0.0.0", "--port", "8080"]
