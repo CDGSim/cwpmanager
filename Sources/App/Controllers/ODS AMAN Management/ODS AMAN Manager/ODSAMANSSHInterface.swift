@@ -58,10 +58,11 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
         //
         // For each position, create the appropriate argument only if
         // the corresponding position in the provided 'layout' is associated to 'branchID'
+        let positionsOnThisBranch = layout.controllerWorkingPositions.filter { cwp in
+            cwp.simulationBranchNumber == branchID          // Get only the positions set on 'branchID'
+        }
         let arguments = self.positions.compactMap { position -> String? in
-            guard let positionRole = layout.controlWorkingPositions.filter({ cwp in
-                cwp.simulationBranchNumber == branchID          // Get only the positions set on 'branchID'
-            }).first(where: { cwp in
+            guard let positionRole = positionsOnThisBranch.first(where: { cwp in
                 cwp.name == position.name                       // Find the position from its name
             })?.role.name else { return nil }                   // Get the position role if found
             return "-p \(positionRole)=\(position.associatedAMANHost)"
@@ -117,7 +118,7 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
             return ControllerWorkingPosition(name: position.name, role: .seq)
         }
         
-        return CWPLayout(controlWorkingPositions: controlWorkingPositions)
+        return CWPLayout(controlWorkingPositions)
     }
     
     func setODS(position:ODSPosition, toExercise exerciseNumber:Int) throws -> String {
