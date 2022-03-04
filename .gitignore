@@ -7,3 +7,4 @@ DerivedData/
 db.sqlite
 .swiftpm
 config.json
+Package.resolved
