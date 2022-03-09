@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  ODSAMANManager.swift
 //  
 //
 //  Created by Axel Péju on 09/02/2022.
