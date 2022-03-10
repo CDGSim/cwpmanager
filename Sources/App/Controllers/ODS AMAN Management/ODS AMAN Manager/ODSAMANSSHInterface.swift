@@ -69,7 +69,7 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
         }
         
         let changeDirectoryCommand = ["cd", "/home/maestro/applicatif/MAESTRO_AMAN/current-version/etc/"]
-        let restartCommand = ["./maestro_stop_instance.sh",
+        let stopCommand = ["./maestro_stop_instance.sh",
                                "-name",
                                "TST_UFA_\(branchID)",
                                "-clean"]
@@ -81,7 +81,14 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
                             "-name TST_UFA_\(branchID)",
                             "-sup cdgins99",
                             "-p SUP=cdgins99"] + arguments + ["-portisfree"]
-        let command = changeDirectoryCommand + [";"] + restartCommand + [";"] + startCommand
+        let command = changeDirectoryCommand + [";"] + stopCommand + [";"] + startCommand
+        
+        let logger = Logger(label: "sshcommand")
+        logger.notice("Executing commands via SSH…")
+        logger.notice("\(changeDirectoryCommand.joined(separator: " "))")
+        logger.notice("\(stopCommand.joined(separator: " "))")
+        logger.notice("\(startCommand.joined(separator: " "))")
+        
         return try runSSHCommand(command, on: gatewayIP, login: gatewayLogin, password: gatewayPassword)
         
     }
