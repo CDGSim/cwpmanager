@@ -26,42 +26,49 @@ enum AMANPositionRole: String, Codable {
     case deps
     case depn
     
+    /// Corresponding AMAN name used to link a TX to an AMAN branch
+    ///
+    /// The name can be arbitrary, but only some positions are allowed
+    /// to make some changes:
+    /// - SEQ, C_INI_IFR, C_INI_N_IFR, C_INI_S_IFR are able to change the
+    /// runway configuration
+    /// - arrival positions are able to change the allocated runway of flights
     var name: String {
         switch self {
         case .seq:
             return "SEQ"
         case .coorini:
-            return "COOR_INI"
+            return "C_INI_IFR"
         case .coorinin:
-            return "COOR_INI_N"
+            return "C_INI_N_IFR"
         case .coorinis:
-            return "COOR_INI_S"
+            return "C_INI_S_IFR"
         case .ini:
-            return "INI"
+            return "INI_IFR"
         case .inin:
-            return "INI_N"
+            return "INI_N_IFR"
         case .inis:
-            return "INI_S"
+            return "INI_S_IFR"
         case .itm:
-            return "ITM"
+            return "ITM_IFR"
         case .itmn:
-            return "ITM_N"
+            return "ITM_N_IFR"
         case .itms:
-            return "ITM_S"
+            return "ITM_S_IFR"
         case .itmba:
-            return "ITM_BA"
+            return "ITM_BA_IFR"
         case .dep:
-            return "DEP"
+            return "DEP_IFR"
         case .deps:
-            return "DEP_S"
+            return "DEP_S_IFR"
         case .depn:
-            return "DEP_N"
+            return "DEP_N_IFR"
         case .coordep:
-            return "COOR_DEP"
+            return "C_DEP_IFR"
         case .coordepn:
-            return "COOR_DEP_N"
+            return "C_DEP_N_IFR"
         case .coordeps:
-            return "COOR_DEP_S"
+            return "C_DEP_S_IFR"
         }
     }
 }
