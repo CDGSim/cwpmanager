@@ -8,9 +8,17 @@ func routes(_ app: Application) throws {
     // Called when a GET request is sent on the / URL
     // This route can be used to display the internal representation
     // of the controller working positions layout in a web browser.
-    // The result is shown as a JSON.
     app.get { req -> String in
-        return "\(odsAMANManager.positionLayout)"
+        var response = String()
+        response += "Représentation interne des positions de contrôle :"
+        response += "\n\n"
+        response += "Position\t\tBranche\t\tRôle\n"
+        response += "-------------------------------------------------\n"
+        response += odsAMANManager.positionLayout.controllerWorkingPositions.map { cwp in
+            let branch = cwp.simulationBranchNumber != nil ? "\(cwp.simulationBranchNumber!)" : "Aucune"
+            return cwp.name + "\t\t" + branch + "\t\t" + cwp.role.name + "\n"
+        }.reduce("") { $0 + $1 }
+        return response
     }
 
     // Websocket on /distribution URL
