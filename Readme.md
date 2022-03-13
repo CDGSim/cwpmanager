@@ -33,6 +33,6 @@ Les clients agissent avec le serveur via les routes suivantes.
 |---|---|---|---|
 | GET | / | - | Affiche une représentation des positions de contrôle. Peut être utilisé pour afficher rapidement l'état du serveur via un navigateur web. |
 | WebSocket | /distribution | - | Permet l'envoi et la réception d'une représentation des positions de contrôle. Tout changement détecté entraine la reconfiguration des positions ODS correspondantes. |
-| POST | /restartAMAN/branchID | branchID : identifiant de la branche concernée | Redémarre une branche AMAN correspondante, en utilisant les rôles de chaque position de contrôle. |
-| POST | /stopAMAN/branchID | branchID : identifiant de la branche concernée | Arrête la branche AMAN correspondante. |
-| GET | /didSetODS/positionName/branch/branchID | positionName : nom de la position ODS, branchID : identifiant de la branche concernée | Permet au serveur de suivre les modifications apportées. Route destinée à être appelée par les machines ODS une fois les ports d'écoute reconfigurés. |
+| POST | /restartAMAN/`branchID` | `branchID` : identifiant de la branche concernée | Redémarre une branche AMAN correspondante, en utilisant les rôles de chaque position de contrôle. |
+| POST | /stopAMAN/`branchID` | `branchID` : identifiant de la branche concernée | Arrête la branche AMAN correspondante. |
+| GET | /didSetODS/`positionName`/branch/`branchID` | `positionName` : nom de la position ODS, `branchID` : identifiant de la branche concernée | Permet au serveur de suivre les modifications apportées. Route destinée à être appelée par les machines ODS une fois les ports d'écoute reconfigurés. |
