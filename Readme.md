@@ -1,7 +1,7 @@
 # CWPManager
 
 CWPManager est un gestionnaire de position de contrôle pour le simulateur approche de CDG.
-Il permet de configurer et basculer des positions ODS et AMAN pour les ratacher à une branche de simulation (exercise group).
+Il permet de configurer et basculer des positions ODS et AMAN pour les rattacher à une branche de simulation (exercise group).
 
 Il se présente sous la forme d'un serveur web HTTP. Différentes routes permettent de déclencher l'exécution de commandes SSH sur les machines ODS et AMAN.
 
@@ -35,4 +35,4 @@ Les clients agissent avec le serveur via les routes suivantes.
 | WebSocket | /distribution | - | Permet l'envoi et la réception d'une représentation des positions de contrôle. Tout changement détecté entraine la reconfiguration des positions ODS correspondantes. |
 | POST | /restartAMAN/branchID | branchID : identifiant de la branche concernée | Redémarre une branche AMAN correspondante, en utilisant les rôles de chaque position de contrôle. |
 | POST | /stopAMAN/branchID | branchID : identifiant de la branche concernée | Arrête la branche AMAN correspondante. |
-| GET | /didSetODS/positionName/branch/branchID | branchID : identifiant de la branche concernée | Permet au serveur de suivre les modifications apportées. |
+| GET | /didSetODS/positionName/branch/branchID | positionName : nom de la position ODS, branchID : identifiant de la branche concernée | Permet au serveur de suivre les modifications apportées. Route destinée à être appelée par les machines ODS une fois les ports d'écoute reconfigurés. |
