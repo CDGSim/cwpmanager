@@ -1,12 +1,12 @@
-#CWPManager
+# CWPManager
 
 CWPManager est un gestionnaire de position de contrôle pour le simulateur approche de CDG.
 Il permet de configurer et basculer des positions ODS et AMAN pour les ratacher à une branche de simulation (exercise group).
 
 Il se présente sous la forme d'un serveur web HTTP. Différentes routes permettent de déclencher l'exécution de commandes SSH sur les machines ODS et AMAN.
 
-##Gestion courante
-###Compilation
+## Gestion courante
+### Compilation
 
 Le serveur peut être compilé à l'aide de Docker. Le Dockerfile contient la définition d'une image nommée `build` qui permet de compiler le code au sein d'un conteneur.
 
@@ -24,8 +24,8 @@ Pour stopper un conteneur, utiliser `docker stop nom_du_conteneur`.
 
 Pour afficher les logs d'un conteneur, utiliser `docker logs nom_du_conteneur`.
 
-##Fonctionnement
-###Routes du serveur HTTP
+## Fonctionnement
+### Routes du serveur HTTP
 
 Les clients agissent avec le serveur via les routes suivantes.
 
