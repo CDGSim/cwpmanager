@@ -24,10 +24,12 @@ struct TestNetworking: ODSAMANNetworking {
     }
     
     func restartAMANOnBranch(_ branchID: Int, withLayout:CWPLayout) throws -> String {
+        sleep(1)
         return "Succesfully restarted branch \(branchID)"
     }
     
     func stopAMANOnBranch(_ branchID: Int) throws -> String {
+        sleep(4)
         return "Succesfully stopped branch \(branchID)"
     }
     

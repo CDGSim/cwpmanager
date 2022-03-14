@@ -63,7 +63,9 @@ func routes(_ app: Application) throws {
     // launching an exercise via a post-launch script.
     app.post("restartAMAN", ":branchID") { req -> HTTPStatus in
         if let branchID = Int(req.parameters.get("branchID")!) {
-            odsAMANManager.restartAMANOnBranch(branchID)
+            Task {
+                odsAMANManager.restartAMANOnBranch(branchID)
+            }
         }
         return HTTPStatus.ok
     }
@@ -73,7 +75,9 @@ func routes(_ app: Application) throws {
     // ending an exercise via a post-shutdown script.
     app.post("stopAMAN", ":branchID") { req -> HTTPStatus in
         if let branchID = Int(req.parameters.get("branchID")!) {
-            odsAMANManager.stopAMANOnBranch(branchID)
+            Task {
+                odsAMANManager.stopAMANOnBranch(branchID)
+            }
         }
         return HTTPStatus.ok
     }
