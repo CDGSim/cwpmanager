@@ -2,6 +2,7 @@
     "gatewayIP":"xxx.xxx.xxx.xxx",
     "gatewayLogin":"login",
     "gatewayPassword":"password",
+    "amanSupervisionHostname":"cdginsxx",
     "positions":
     [
         {
