@@ -19,6 +19,7 @@ struct ConfigurationEnvironmentVariable: Decodable {
     let gatewayLogin: String
     let gatewayPassword: String
     let positions: [ODSPosition]
+    let amanSupervisionHostname: String
 }
 
 /// An interface able to connect to AMAN and ODS machines via SSH
@@ -30,6 +31,8 @@ struct ODSAMANSSHInterface {
     
     private var gatewayLogin: String
     private var gatewayPassword: String
+    
+    private var amanSupervisionHostname: String
     
     internal init() {
         guard let configurationJSON = Environment.get("CONFIG"), let data = configurationJSON.data(using: .utf8) else {
@@ -43,6 +46,7 @@ struct ODSAMANSSHInterface {
             self.gatewayIP = setupConfiguration.gatewayIP
             self.gatewayLogin = setupConfiguration.gatewayLogin
             self.gatewayPassword = setupConfiguration.gatewayPassword
+            self.amanSupervisionHostname = setupConfiguration.amanSupervisionHostname
         } catch {
             fatalError("Could not decode CONFIG environement variable")
         }
@@ -79,8 +83,8 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
                             "-itf Sigma=UFA\(branchID):220\(15+branchID)",
                             "-data LFPG",
                             "-name TST_UFA_\(branchID)",
-                            "-sup cdgins99",
-                            "-p SUP=cdgins99"] + arguments + ["-portisfree"]
+                            "-sup \(amanSupervisionHostname)",
+                            "-p SUP=\(amanSupervisionHostname)"] + arguments + ["-portisfree"]
         let command = changeDirectoryCommand + [";"] + stopCommand + [";"] + startCommand
         
         let logger = Logger(label: "sshcommand")
