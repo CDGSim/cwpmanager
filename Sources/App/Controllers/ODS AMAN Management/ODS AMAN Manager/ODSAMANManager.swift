@@ -11,7 +11,6 @@ import Vapor
 class ODSAMANManager {
     
     var clients = WebsocketClients()
-    var positionLayout: CWPLayout
     
     var networking: ODSAMANNetworking
     
@@ -21,7 +20,7 @@ class ODSAMANManager {
     internal init(networking: ODSAMANNetworking = ODSAMANSSHInterface()) {
         self.networking = networking
         
-        self.positionLayout = networking.fetchPositionsLayout()
+        self.state = ManagerState(positionLayout:networking.fetchPositionsLayout())
     }
     
     /// Configures the manager with the application.
@@ -31,26 +30,53 @@ class ODSAMANManager {
         app.logger.notice(.init(stringLiteral: "Configure ODS Manager"))
     }
     
-    actor ODSChanges {
-        var count: Int = 0
-        func increase() {
-            count += 1
+    actor ManagerState {
+        internal init(count: Int = 0, positionLayout: CWPLayout) {
+            self.changesInProgress = count
+            self.positionLayout = positionLayout
+            self.changedLayout = CWPLayout([])
         }
-        func decrease() {
-            count -= 1
+        
+        private (set) var changesInProgress: Int = 0
+        func increaseChangesInProgress() {
+            changesInProgress += 1
+        }
+        func decreaseChangesInProgress() {
+            changesInProgress -= 1
+        }
+        
+        private (set) var positionLayout: CWPLayout
+        func saveLayout(_ layout: CWPLayout) {
+            self.positionLayout = layout
+        }
+        
+        private (set) var changedLayout: CWPLayout
+        func saveNewPosition(position: ControllerWorkingPosition) {
+            if let existingIndex = self.changedLayout.controllerWorkingPositions.firstIndex(where: { $0.name == position.name }) {
+                self.changedLayout.controllerWorkingPositions[existingIndex] = position
+            } else {
+                self.changedLayout.controllerWorkingPositions.append(position)
+            }
+        }
+        
+        func saveNewPositions(_ positions: [ControllerWorkingPosition]) {
+            positions.forEach { cwp in
+                self.saveNewPosition(position: cwp)
+            }
         }
     }
-    private var changesInProgress = ODSChanges()
+    
+    private (set) var state: ManagerState
     
     func didReceivePositionLayout(_ layout:CWPLayout) {
         app?.logger.notice(.init(stringLiteral: "Client sent new layout"))
         
-        let previousLayout = self.positionLayout
-        
-        // Save new layout
-        self.positionLayout = layout
         Task {
-            await changesInProgress.increase()
+            await state.increaseChangesInProgress()
+            let previousLayout = await state.positionLayout
+            
+            var changedPositions = [ControllerWorkingPosition]()
+            
             layout.controllerWorkingPositions.forEach { newPosition in
                 if let inMemoryPosition = previousLayout.controllerWorkingPositions.first(where: { $0.name == newPosition.name }) {
                     // Check if simulationBranchNumber is different
@@ -61,6 +87,7 @@ class ODSAMANManager {
                             do {
                                 let commandResult = try self.networking.setODS(position: position, toExercise: newBranchNumber)
                                 app?.logger.notice(.init(stringLiteral: commandResult))
+                                changedPositions.append(newPosition)
                             } catch {
                                 app?.logger.critical(.init(stringLiteral: "error setting ODS… \(error)"))
                             }
@@ -68,15 +95,30 @@ class ODSAMANManager {
                     }
                 }
             }
-            await changesInProgress.decrease()
             
-            guard await changesInProgress.count == 0 else {
+            await state.saveNewPositions(changedPositions)
+            await state.decreaseChangesInProgress()
+            
+            guard await state.changesInProgress == 0 else {
                 return
             }
             
+            // Fetch all changed positions and merge them in current layout
+            let currentLayout = await state.positionLayout
+            let changedLayout = await state.changedLayout
+            let newLayoutPositions = currentLayout.controllerWorkingPositions.map { cwp -> ControllerWorkingPosition in
+                if let matchingChangedCWP = changedLayout.controllerWorkingPositions.first(where: { $0.name == cwp.name }) {
+                    return matchingChangedCWP
+                } else {
+                    return cwp
+                }
+            }
+            
+            await state.saveLayout(CWPLayout(newLayoutPositions))
+            
             // Send the new layout to all subscribers
-            for socket in clients.websockets() {
-                if let payload = try? JSONEncoder().encode(layout) {
+            if let payload = try? await JSONEncoder().encode(state.positionLayout) {
+                for socket in clients.websockets() {
                     let bytes = [UInt8](payload)
                     try? await socket.send(bytes)
                 }
@@ -85,22 +127,24 @@ class ODSAMANManager {
     }
     
     func restartAMANOnBranch(_ branchID:Int) {
-        // Check that each position in this branch has a different role.
-        // If we send a command with 2 positions with the same role, we will
-        // have an error.
-        let branchPositions = positionLayout.controllerWorkingPositions.filter { position in
-            position.simulationBranchNumber == branchID
+        Task {
+            // Check that each position in this branch has a different role.
+            // If we send a command with 2 positions with the same role, we will
+            // have an error.
+            let branchPositions = await state.positionLayout.controllerWorkingPositions.filter { position in
+                position.simulationBranchNumber == branchID
+            }
+            let positionRoles = Set(branchPositions.map({ $0.role }))
+            guard positionRoles.count == branchPositions.count else {
+                let error = "Cannot restart AMAN: two positions have the same role."
+                app?.logger.notice(.init(stringLiteral: "\(error)"))
+                return
+            }
+            
+            app?.logger.notice(.init(stringLiteral: "Will restart AMAN on branch \(branchID)"))
+            let result = try? await self.networking.restartAMANOnBranch(branchID, withLayout: state.positionLayout)
+            app?.logger.notice(.init(stringLiteral: "Result : \(result ?? "error")"))
         }
-        let positionRoles = Set(branchPositions.map({ $0.role }))
-        guard positionRoles.count == branchPositions.count else {
-            let error = "Cannot restart AMAN: two positions have the same role."
-            app?.logger.notice(.init(stringLiteral: "\(error)"))
-            return
-        }
-        
-        app?.logger.notice(.init(stringLiteral: "Will restart AMAN on branch \(branchID)"))
-        let result = try? self.networking.restartAMANOnBranch(branchID, withLayout: positionLayout)
-        app?.logger.notice(.init(stringLiteral: "Result : \(result ?? "error")"))
     }
     
     func stopAMANOnBranch(_ branchID:Int) {
