@@ -87,11 +87,14 @@ class ODSAMANManager {
                             do {
                                 let commandResult = try self.networking.setODS(position: position, toExercise: newBranchNumber)
                                 app?.logger.notice(.init(stringLiteral: commandResult))
-                                changedPositions.append(newPosition)
                             } catch {
                                 app?.logger.critical(.init(stringLiteral: "error setting ODS… \(error)"))
                             }
                         }
+                    }
+                    if inMemoryPosition.simulationBranchNumber != newPosition.simulationBranchNumber ||
+                        inMemoryPosition.role != newPosition.role {
+                        changedPositions.append(newPosition)
                     }
                 }
             }
