@@ -155,4 +155,12 @@ class ODSAMANManager {
         let result = try? self.networking.stopAMANOnBranch(branchID)
         app?.logger.notice(.init(stringLiteral: "Result : \(result ?? "error")"))
     }
+    
+    func restartODSOnBranch(_ branchID:Int) {
+        app?.logger.notice(.init(stringLiteral: "Will restart all ODS on branch \(branchID)"))
+        Task {
+            let result = try? await self.networking.restartODSOnBranch(branchID, withLayout: state.positionLayout)
+            app?.logger.notice(.init(stringLiteral: "Result : \(result ?? "error")"))
+        }
+    }
 }

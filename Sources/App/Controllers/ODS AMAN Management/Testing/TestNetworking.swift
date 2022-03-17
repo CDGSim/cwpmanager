@@ -33,4 +33,9 @@ struct TestNetworking: ODSAMANNetworking {
         return "Succesfully stopped branch \(branchID)"
     }
     
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String {
+        sleep(2)
+        return "Succesfully restarted ODS on branch \(branchID)"
+    }
+    
 }

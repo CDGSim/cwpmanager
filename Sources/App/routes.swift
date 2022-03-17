@@ -82,6 +82,19 @@ func routes(_ app: Application) throws {
         return HTTPStatus.ok
     }
     
+    // POST request on /restartODS/<branchID>
+    // This route should be used by SimControl after
+    // launching an exercise via a post-launch script
+    // mainly to restart the maps process
+    app.post("restartODS", ":branchID") { req -> HTTPStatus in
+        if let branchID = Int(req.parameters.get("branchID")!) {
+            Task {
+                odsAMANManager.restartODSOnBranch(branchID)
+            }
+        }
+        return HTTPStatus.ok
+    }
+    
     // GET request on /didSetODS/<positionName/branch/<branchID>
     // Should be sent by ODS after setting itself to branchID
     app.get("didSetODS", ":positionName", "branch", ":branchID") { req async -> HTTPStatus in

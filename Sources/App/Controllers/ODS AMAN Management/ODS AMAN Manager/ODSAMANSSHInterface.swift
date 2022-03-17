@@ -107,6 +107,17 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
         return try runSSHCommand(command, on: gatewayIP, login: gatewayLogin, password: gatewayPassword)
     }
     
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String {
+        let positionsOnBranch = layout.controllerWorkingPositions.filter { $0.simulationBranchNumber == branchID }
+        let positionsNames = positionsOnBranch.map { $0.name }
+        let correspondingODSPositions = positions.filter { positionsNames.contains($0.name)}
+        var result = ""
+        try correspondingODSPositions.forEach { position in
+            result += try self.setODS(position: position, toExercise: branchID)
+        }
+        return result
+    }
+    
     func fetchPositionsLayout() -> CWPLayout {
         let controlWorkingPositions = positions.map { position -> ControllerWorkingPosition in
             // Fetch the content of the status file on the ODS machine

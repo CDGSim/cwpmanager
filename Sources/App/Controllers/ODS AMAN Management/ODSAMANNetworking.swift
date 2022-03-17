@@ -22,4 +22,7 @@ protocol ODSAMANNetworking {
     
     /// Stop AMAN on the specified branch
     func stopAMANOnBranch(_ branchID:Int) throws -> String
+    
+    /// Restart ODS positions on the specified branch
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String
 }
