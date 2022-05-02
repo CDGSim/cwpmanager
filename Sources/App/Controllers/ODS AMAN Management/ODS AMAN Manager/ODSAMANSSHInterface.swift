@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-struct ODSPosition: Decodable {
+struct ODSPosition: Decodable, Hashable {
     let name: String
     let associatedODSHost: String
     let associatedAMANHost: String
@@ -107,7 +107,7 @@ extension ODSAMANSSHInterface: ODSAMANNetworking {
         return try runSSHCommand(command, on: gatewayIP, login: gatewayLogin, password: gatewayPassword)
     }
     
-    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String {
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String {        
         let positionsOnBranch = layout.controllerWorkingPositions.filter { $0.simulationBranchNumber == branchID }
         let positionsNames = positionsOnBranch.map { $0.name }
         let correspondingODSPositions = positions.filter { positionsNames.contains($0.name)}

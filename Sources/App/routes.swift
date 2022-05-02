@@ -10,6 +10,8 @@ func routes(_ app: Application) throws {
     // of the controller working positions layout in a web browser.
     app.get { req async -> String in
         var response = String()
+        response += "v1.1b3"
+        response += "\n\n"
         response += "Représentation interne des positions de contrôle :"
         response += "\n\n"
         response += "Position\t\tBranche\t\tRôle\n"
@@ -46,7 +48,9 @@ func routes(_ app: Application) throws {
                 let content = try JSONDecoder().decode(CWPLayout.self, from:binary)
                 
                 // Notify the manager
-                odsAMANManager.didReceivePositionLayout(content)
+                Task {
+                    try? await odsAMANManager.didReceivePositionLayout(content)
+                }
             } catch {
                 print("error decoding \(error)")
             }
@@ -73,26 +77,25 @@ func routes(_ app: Application) throws {
     // POST request on /stopAMAN/<branchID>
     // This route can be used by a client application, or SimControl after
     // ending an exercise via a post-shutdown script.
-    app.post("stopAMAN", ":branchID") { req -> HTTPStatus in
+    app.post("stopAMAN", ":branchID") { req async -> HTTPStatus in
         if let branchID = Int(req.parameters.get("branchID")!) {
-            Task {
-                odsAMANManager.stopAMANOnBranch(branchID)
-            }
+            odsAMANManager.stopAMANOnBranch(branchID)
+            return HTTPStatus.ok
+        } else {
+            return HTTPStatus.badRequest
         }
-        return HTTPStatus.ok
     }
     
     // POST request on /restartODS/<branchID>
     // This route should be used by SimControl after
     // launching an exercise via a post-launch script
     // mainly to restart the maps process
-    app.post("restartODS", ":branchID") { req -> HTTPStatus in
+    app.post("restartODS", ":branchID") { req async -> HTTPStatus in
         if let branchID = Int(req.parameters.get("branchID")!) {
-            Task {
-                odsAMANManager.restartODSOnBranch(branchID)
-            }
+            return await odsAMANManager.restartODSOnBranch(branchID)
+        } else {
+            return HTTPStatus.badRequest
         }
-        return HTTPStatus.ok
     }
     
     // GET request on /didSetODS/<positionName/branch/<branchID>
@@ -110,7 +113,7 @@ func routes(_ app: Application) throws {
             layout.controllerWorkingPositions[positionIndex].simulationBranchNumber = branchID
             
             // Trigger an update, the manager will notify all its clients
-            odsAMANManager.didReceivePositionLayout(layout)
+            try? await odsAMANManager.didReceivePositionLayout(layout)
         }
         return HTTPStatus.ok
     }

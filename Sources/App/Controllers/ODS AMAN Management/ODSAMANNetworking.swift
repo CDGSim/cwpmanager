@@ -24,5 +24,5 @@ protocol ODSAMANNetworking {
     func stopAMANOnBranch(_ branchID:Int) throws -> String
     
     /// Restart ODS positions on the specified branch
-    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) async throws -> String
 }
