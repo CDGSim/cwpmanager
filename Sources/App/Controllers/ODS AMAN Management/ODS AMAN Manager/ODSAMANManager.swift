@@ -217,8 +217,10 @@ class ODSAMANManager {
         lastODSRelaunchTimes[branchID] = Date()
         
         app?.logger.info("Will restart all ODS on branch \(branchID)")
-        let result = try? await self.networking.restartODSOnBranch(branchID, withLayout: state.positionLayout)
-        app?.logger.info("Result : \(result ?? "error")")
+        Task {
+            let result = try? await self.networking.restartODSOnBranch(branchID, withLayout: state.positionLayout)
+            app?.logger.info("Result : \(result ?? "error")")
+        }
         
         return .ok
     }
