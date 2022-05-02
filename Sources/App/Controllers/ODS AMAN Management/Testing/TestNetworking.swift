@@ -20,11 +20,12 @@ struct TestNetworking: ODSAMANNetworking {
     }
     
     func setODS(position: ODSPosition, toExercise exerciseNumber: Int) throws -> String {
+        sleep(2)
         return "Succesfully set ODS to exercise \(exerciseNumber)"
     }
     
     func restartAMANOnBranch(_ branchID: Int, withLayout:CWPLayout) throws -> String {
-        sleep(1)
+        sleep(10)
         return "Succesfully restarted branch \(branchID)"
     }
     
@@ -33,8 +34,8 @@ struct TestNetworking: ODSAMANNetworking {
         return "Succesfully stopped branch \(branchID)"
     }
     
-    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) throws -> String {
-        sleep(2)
+    func restartODSOnBranch(_ branchID:Int, withLayout layout: CWPLayout) async throws -> String {
+        sleep(10)
         return "Succesfully restarted ODS on branch \(branchID)"
     }
     
